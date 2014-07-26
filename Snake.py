@@ -1,20 +1,24 @@
 
 import pygame
 import random
+import curses
+
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (46,139,87)
 YELLOW = (255,255,0)
+
+
  
-# Set the width and height of each snake segment
-segment_width = 20
-segment_height = 20
+# Set the width and height of each snake block
+block_width = 20
+block_height = 20
 # Margin between each segment
 segment_margin = 3
  
 # Set initial speed
-x_change = segment_width + segment_margin
+x_change = block_width + segment_margin
 y_change = 0
 #Set inital level
 level = 1
@@ -31,7 +35,7 @@ class Segment(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
  
         # Set height, width
-        self.image = pygame.Surface([segment_width, segment_height])
+        self.image = pygame.Surface([block_width, block_height])
         self.image.fill(GREEN)
  
         # Make our top-left corner the passed-in location.
@@ -45,16 +49,6 @@ def Collision(snake):
     for i in range(1,len(snake)):
          if snake[0].rect.x == snake[i].rect.x and snake[0].rect.y == snake[i].rect.y:
              return False            
-    # Check if snake collides with wall
-    if snake[0].rect.x >= 770 or snake[0].rect.x<29:
-            return  False
-    if snake[0].rect.y>=564 or snake[0].rect.y<30:
-            return False        
-
-def foodCol(snake,x,y):
-    if (snake[0].rect.x) <= x+30 and ((snake[0].rect.x)+30) >= x:
-        if (snake[0].rect.y) <= y+30 and ((snake[0].rect.y)) >= y:
-            return True
         
 def randomGen(x,y):
     return random.randint(x,y)
@@ -75,7 +69,7 @@ allspriteslist = pygame.sprite.Group()
 # Create an initial snake
 snake_segments = []
 for i in range(10):
-    x = 250 - (segment_width + segment_margin) * i
+    x = 250 - (block_width + segment_margin) * i
     y = 30
     segment = Segment(x, y)
     snake_segments.append(segment)
@@ -86,6 +80,29 @@ clock = pygame.time.Clock()
 done = False
 Fx = randomGen(36,765)
 Fy = randomGen(30,564)
+food = pygame.Rect(Fx,Fy,20,20)
+
+#Start menu
+
+pygame.draw.rect(screen,WHITE, (17,16,765,567), 0)
+button = pygame.Rect(260,200,300,160)
+pygame.draw.rect(screen,(255,000,000),(260,200,300,160),20)
+myfont = pygame.font.SysFont("monospace", 100)
+Playlabel = myfont.render(("Play"),120,(255,0,0))
+screen.blit(Playlabel, (280,220))
+pygame.display.flip()
+
+pressed = True
+
+# Wait until user clicks button
+while pressed:
+    ev = pygame.event.get()
+  # proceed events
+    for event in ev:
+      if event.type == pygame.MOUSEBUTTONDOWN and button.collidepoint(pygame.mouse.get_pos()):          
+          pressed = False
+          
+         
 # Game Loop
 while not done:
  
@@ -98,17 +115,17 @@ while not done:
         # segment, plus the margin.
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                x_change = (segment_width + segment_margin) *- 1
+                x_change = (block_width + segment_margin) *- 1
                 y_change = 0
             if event.key == pygame.K_RIGHT:
-                x_change = (segment_width + segment_margin)
+                x_change = (block_width + segment_margin)
                 y_change = 0
             if event.key == pygame.K_UP:
                 x_change = 0
-                y_change = (segment_height + segment_margin) *- 1
+                y_change = (block_height + segment_margin) *- 1
             if event.key == pygame.K_DOWN:
                 x_change = 0
-                y_change = (segment_height + segment_margin)
+                y_change = (block_height + segment_margin)
         
 
     
@@ -127,9 +144,14 @@ while not done:
     allspriteslist.add(segment)
 
     #Call method to check for collision
+    newRect = pygame.Rect(snake_segments[0].rect.x,snake_segments[0].rect.y,20,20)
+    innerRect = pygame.Rect(17,16,765,567)
+    
+    if innerRect.contains(newRect)==False:
+        done = True
     if Collision(snake_segments) == False:
-       done = True
-    if foodCol(snake_segments,Fx,Fy) == True:
+        done = True
+    if newRect.colliderect(food) == True:
         level = level +1
         snake_segments.insert(0, segment)
         allspriteslist.add(segment)
@@ -139,8 +161,8 @@ while not done:
     # -- Draw everything
     # Clear screen
     pygame.display.set_caption('Snake')
-    #Make head of snake Yellow
     
+    #Make head of snake Yellow    
     snake_segments[1].image.fill(GREEN)
     snake_segments[0].image.fill(YELLOW)
     
@@ -150,14 +172,15 @@ while not done:
     pygame.draw.rect(screen,WHITE, (17,16,765,567), 0)
     
 
-    myfont = pygame.font.SysFont("monospace", 60)
+    
 
     # render text
-    label = myfont.render("Snake food:"+str(level),100,BLACK)
-    screen.blit(label, (287,30))
+    label = myfont.render("Snake:"+str(level),100,BLACK)
+    screen.blit(label, (227,30))
 
-    #Draw food
-    pygame.draw.rect(screen,(255,0,0),(Fx,Fy,20,20))
+    #Draw food                
+    food = pygame.Rect(Fx,Fy,20,20)
+    pygame.draw.rect(screen,(255,0,0),food)  
     #Draw Snake
     allspriteslist.draw(screen)
     # Flip screen
