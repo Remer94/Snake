@@ -25,6 +25,19 @@ level = 1
 #Food coordinates
 Fx = 0
 Fy = 0
+#File storing high scores
+file = open("/Users/ryanremer/Desktop/Untitled.txt",'r')
+# Create an 800x600 sized screen
+screen = pygame.display.set_mode([800, 600])
+#Buttons for menu
+button = pygame.Rect(260,110,300,160)
+button2 = pygame.Rect(77,310,673,160)
+
+
+# Call this function so the Pygame library can initialize itself
+pygame.init()
+
+myfont = pygame.font.SysFont("monospace", 100)
  
 class Segment(pygame.sprite.Sprite):
     """ Class to represent one segment of the snake. """
@@ -52,14 +65,26 @@ def Collision(snake):
         
 def randomGen(x,y):
     return random.randint(x,y)
+#Start menu
+def drawMenu():
+    pygame.draw.rect(screen,WHITE, (17,16,765,567), 0)
+    pygame.draw.rect(screen,(255,000,000),button,5)
+    pygame.draw.rect(screen,(255,000,000),button2,5)
     
+    Playlabel = myfont.render(("Play"),90,(255,0,0))
+    HighScoreLabel = myfont.render(("High Scores"),200,(255,0,0))
 
+    screen.blit(HighScoreLabel,(85,330))
+    screen.blit(Playlabel, (280,130))
+    pygame.display.flip()
  
-# Call this function so the Pygame library can initialize itself
-pygame.init()
- 
-# Create an 800x600 sized screen
-screen = pygame.display.set_mode([800, 600])
+def drawHighScores():
+    screen.fill
+    screen.set_alpha(255)
+    pygame.draw.rect(screen,WHITE, (17,16,765,567), 0)
+    HighScoreLabel = myfont.render(("High Scores"),200,(255,0,0))
+    screen.blit(HighScoreLabel,(85,130))
+
  
 # Set the title of the window
 pygame.display.set_caption('Snake!')
@@ -77,30 +102,27 @@ for i in range(10):
  
  
 clock = pygame.time.Clock()
-done = False
+done = True
 Fx = randomGen(36,765)
 Fy = randomGen(30,564)
 food = pygame.Rect(Fx,Fy,20,20)
 
-#Start menu
 
-pygame.draw.rect(screen,WHITE, (17,16,765,567), 0)
-button = pygame.Rect(260,200,300,160)
-pygame.draw.rect(screen,(255,000,000),(260,200,300,160),20)
-myfont = pygame.font.SysFont("monospace", 100)
-Playlabel = myfont.render(("Play"),120,(255,0,0))
-screen.blit(Playlabel, (280,220))
-pygame.display.flip()
 
-pressed = True
-
+drawMenu()
 # Wait until user clicks button
+pressed = True
 while pressed:
     ev = pygame.event.get()
   # proceed events
     for event in ev:
       if event.type == pygame.MOUSEBUTTONDOWN and button.collidepoint(pygame.mouse.get_pos()):          
           pressed = False
+          done = False
+      if event.type == pygame.MOUSEBUTTONDOWN and button2.collidepoint(pygame.mouse.get_pos()):
+          done = True
+          pressed = False
+          drawHighScores()
           
          
 # Game Loop
